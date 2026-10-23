@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cafe Stock Freshness</title>
+<style>
+:root {
+ --site-primary:#245747;
+ --site-on-primary:#FFFFFF;
+ --site-secondary:#E9F1E9;
+ --site-on-secondary:#193A30;
+ --site-background:#F6F7F2;
+ --site-on-background:#1D2924;
+ --site-font-body:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+ --site-font-heading:Georgia,"Times New Roman",serif;
+ --site-heading-scale:1;
+ --site-spacing-scale:1;
+ --site-radius-scale:1;
+ --site-decoration-opacity:1;
+ --surface:#FFFFFF;
+ --muted:#68766F;
+ --border:#E0E6DF;
+ --danger:#B42318;
+ --danger-bg:#FDECEA;
+ --warn:#9A5B00;
+ --warn-bg:#FFF1D5;
+ --ok:#246B45;
+ --ok-bg:#E4F4E9;
+}
+*{box-sizing:border-box}
+body{margin:0;background:light-dark(#F6F7F2,#151B18);color:light-dark(var(--site-on-background),#EAF0EB);font-family:var(--site-font-body)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+#app{background-color:var(--site-background);color:var(--site-on-background);min-height:100vh;border-radius:0}
+.topbar{background:var(--site-primary);color:var(--site-on-primary);padding:calc(24px * var(--site-spacing-scale)) max(20px,calc((100vw - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{width:45px;height:45px;border-radius:14px;background:#FFFFFF20;display:grid;place-items:center;font-size:24px}
+.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:10px;opacity:.8;font-weight:800}
+h1,h2,h3,p{margin-top:0}
+h1{font-family:var(--site-font-heading);font-size:calc(30px * var(--site-heading-scale));margin:3px 0 0;font-weight:600}
+.top-note{font-size:13px;opacity:.82}
+main{max-width:1180px;margin:auto;padding:calc(26px * var(--site-spacing-scale)) 20px 48px}
+.pagehead{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:22px}
+.pagehead h2{font-size:22px;margin:0 0 5px}
+.pagehead p{color:var(--muted);font-size:13px;margin:0}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--site-on-background);padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px}
+.btn.primary{background:var(--site-primary);border-color:var(--site-primary);color:white}
+.btn:hover{filter:brightness(.97)}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:23px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:calc(15px * var(--site-radius-scale));padding:18px}
+.card-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;font-weight:700}
+.card-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:var(--site-secondary);color:var(--site-on-secondary);font-size:16px}
+.metric{font-size:30px;font-weight:800;letter-spacing:-.04em;margin:12px 0 3px}
+.caption{font-size:12px;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:calc(16px * var(--site-radius-scale));overflow:hidden}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:19px 20px;border-bottom:1px solid var(--border)}
+.panel-head h3{margin:0;font-size:16px}
+.panel-head p{font-size:12px;color:var(--muted);margin:5px 0 0}
+.filters{display:flex;gap:8px;flex-wrap:wrap;padding:15px 20px;border-bottom:1px solid var(--border)}
+input,select,textarea{border:1px solid #D7DFD7;border-radius:9px;padding:10px 11px;background:var(--surface);color:var(--site-on-background);min-width:0}
+.filters input{flex:1;min-width:160px}
+.filters select{min-width:145px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:13px}
+th{text-align:left;background:#F7F9F6;color:#68766F;font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:12px 16px}
+td{padding:14px 16px;border-top:1px solid #EDF0EB;vertical-align:middle}
+.product{font-weight:750}
+.sub{font-size:11px;color:var(--muted);margin-top:4px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:99px;font-size:10px;font-weight:800;white-space:nowrap}
+.pill.expired{color:var(--danger);background:var(--danger-bg)}
+.pill.urgent{color:#9A4A00;background:#FFE7D1}
+.pill.soon{color:var(--warn);background:var(--warn-bg)}
+.pill.ok{color:var(--ok);background:var(--ok-bg)}
+.pill.missing{color:#475569;background:#E8EDF3}
+.rowactions{display:flex;gap:6px}
+.iconbtn{border:1px solid var(--border);background:white;border-radius:8px;padding:6px 8px}
+.empty{padding:36px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--site-on-background);margin-bottom:5px}
+.footer{font-size:11px;color:var(--muted);margin-top:13px;line-height:1.6}
+.modalback{position:fixed;inset:0;background:#12221bcc;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}
+.modalback.open{display:flex}
+.modal{background:var(--site-background);color:var(--site-on-background);border-radius:18px;padding:23px;width:min(600px,100%);max-height:92vh;overflow:auto;box-shadow:0 20px 70px #0004}
+.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modalhead h3{margin:0;font-family:var(--site-font-heading);font-size:24px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.field{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:750}
+.field.full{grid-column:1/-1}
+.field input,.field select,.field textarea{width:100%;font-weight:400}
+.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.close{border:0;background:transparent;font-size:23px}
+.notice{background:var(--site-secondary);color:var(--site-on-secondary);padding:12px 14px;border-radius:10px;font-size:12px;margin-bottom:18px;line-height:1.5}
+.alertsettings{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:calc(15px * var(--site-radius-scale));padding:17px 20px;margin:0 0 22px}
+.alertsettings h3{font-size:15px;margin:0 0 4px}
+.alertsettings p{font-size:12px;color:var(--muted);margin:0;line-height:1.5}
+.alertcontrols{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.alertcontrols input[type=time]{width:125px}
+.toggle{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:750;white-space:nowrap}
+.alertmessage{font-size:11px;color:var(--muted);margin-top:8px}
+@media(max-width:760px){.topbar{padding:18px 16px}.top-note{display:none}main{padding:22px 13px 36px}.pagehead{align-items:start;flex-direction:column}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.card{padding:14px}.metric{font-size:27px}.panel-head{padding:16px}.filters{padding:12px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}h1{font-size:25px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header class="topbar">
+ <div class="brand"><div class="logo">☕</div><div><div class="eyebrow">Cafe operations</div><h1>Freshness Desk</h1></div></div>
+ <div class="top-note">Stock smart. Serve fresh.</div>
+</header>
+<main>
+ <div class="pagehead">
+  <div><h2>Expiry overview</h2><p>Keep every ingredient in date and every shift in control.</p></div>
+  <div class="actions"><button class="btn" id="exportBtn">↓ Export CSV</button><button class="btn primary" id="addBtn">＋ Add stock item</button></div>
+ </div>
+ <section class="cards">
+  <div class="card"><div class="card-top">Items tracked <span class="card-icon">▤</span></div><div class="metric" id="totalCount">0</div><div class="caption">Stock entries recorded</div></div>
+  <div class="card"><div class="card-top">Expired <span class="card-icon">!</span></div><div class="metric" id="expiredCount">0</div><div class="caption">Remove from use and review</div></div>
+  <div class="card"><div class="card-top">Due in 3 days <span class="card-icon">◷</span></div><div class="metric" id="urgentCount">0</div><div class="caption">Check these items today</div></div>
+  <div class="card"><div class="card-top">Due in 7 days <span class="card-icon">✓</span></div><div class="metric" id="soonCount">0</div><div class="caption">Plan safe stock rotation</div></div>
+ </section>
+ <section class="alertsettings" aria-labelledby="alertHeading">
+  <div><h3 id="alertHeading">🔔 Daily expiry reminder</h3><p>Enable browser notifications for items that are expired or expiring within 7 days.</p><div class="alertmessage" id="alertMessage" role="status">Notifications are off. Allow permission in your browser to receive reminders while this app is open.</div></div>
+  <div class="alertcontrols"><label class="toggle"><input type="checkbox" id="alertsEnabled"> Daily alerts</label><label class="toggle" for="alertTime">Time</label><input id="alertTime" type="time" value="08:00" aria-label="Daily reminder time"><button class="btn" id="testAlertBtn" type="button">Test alert</button></div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h3>Stock expiry register</h3><p>Search, filter and update your cafe inventory.</p></div><span class="pill ok" id="visibleCount">0 items</span></div>
+  <div class="filters">
+   <input id="search" placeholder="Search item, supplier, batch…" aria-label="Search stock">
+   <select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="expired">Expired</option><option value="today">Expires today</option><option value="urgent">1–3 days</option><option value="soon">4–7 days</option><option value="ok">OK</option><option value="missing">Missing date</option></select>
+   <select id="categoryFilter" aria-label="Filter by category"><option value="all">All categories</option><option>Dairy</option><option>Produce</option><option>Meat & seafood</option><option>Bakery</option><option>Prepared food</option><option>Sauce & condiment</option><option>Dry goods</option><option>Beverage</option><option>Other</option></select>
+  </div>
+  <div class="tablewrap"><table><thead><tr><th>Product</th><th>Category</th><th>Expiry date</th><th>Qty</th><th>Storage</th><th>Days left</th><th>Status</th><th>Actions</th></tr></thead><tbody id="stockRows"></tbody></table><div class="empty" id="emptyState"><b>Your stock list starts here</b>Add your first ingredient or packaged product to begin tracking expiry dates.</div></div>
+ </section>
+ <p class="footer">Tip: use FEFO (first-expired, first-out) for safe stock rotation. Dates are calculated on this device. Entries are saved in this browser only; export a CSV backup regularly. Follow product labels and local food-safety rules.</p>
+</main>
+</div>
+<div class="modalback" id="modalback" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+ <form class="modal" id="stockForm">
+  <div class="modalhead"><h3 id="modalTitle">Add stock item</h3><button type="button" class="close" id="closeModal" aria-label="Close">×</button></div>
+  <div class="notice">Enter the expiry date exactly as shown on the product label. Do not guess a missing date.</div>
+  <div class="formgrid">
+   <label class="field">Product name *<input required name="name" placeholder="e.g. Fresh milk"></label>
+   <label class="field">Category<select name="category"><option>Dairy</option><option>Produce</option><option>Meat & seafood</option><option>Bakery</option><option>Prepared food</option><option>Sauce & condiment</option><option>Dry goods</option><option>Beverage</option><option>Other</option></select></label>
+   <label class="field">Expiry date<input name="expiry" type="date"></label>
+   <label class="field">Quantity<input name="qty" type="number" min="0" step="any" placeholder="e.g. 6"></label>
+   <label class="field">Unit<select name="unit"><option>pcs</option><option>pack</option><option>bottle</option><option>can</option><option>kg</option><option>g</option><option>L</option><option>mL</option><option>portion</option></select></label>
+   <label class="field">Storage location<select name="storage"><option>Fridge</option><option>Freezer</option><option>Dry store</option><option>Display counter</option><option>Coffee bar</option><option>Other</option></select></label>
+   <label class="field">Supplier<input name="supplier" placeholder="Supplier name"></label>
+   <label class="field">Batch / lot number<input name="batch" placeholder="Optional"></label>
+   <label class="field full">Notes<textarea name="notes" rows="2" placeholder="Opened date, label details, action needed…"></textarea></label>
+  </div>
+  <div class="modalfoot"><button type="button" class="btn" id="cancelBtn">Cancel</button><button type="submit" class="btn primary">Save item</button></div>
+ </form>
+</div>
+<script>
+(function(){
+ const KEY='freshnessDeskStockV1';
+ const ALERT_KEY='freshnessDeskAlertSettingsV1';
+ let items=[];
+ try{items=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){items=[]}
+ let alertSettings={enabled:false,time:'08:00',lastSent:''};
+ try{alertSettings={...alertSettings,...JSON.parse(localStorage.getItem(ALERT_KEY)||'{}')}}catch(e){}
+ let editing=null;
+ const $=id=>document.getElementById(id);
+ const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+ const dayDiff=val=>{if(!val)return null;const d=new Date(val+'T00:00:00');return Math.round((d-today())/86400000)};
+ const statusOf=item=>{const n=dayDiff(item.expiry);if(n===null)return {key:'missing',label:'ADD DATE'};if(n<0)return {key:'expired',label:'EXPIRED'};if(n===0)return {key:'today',label:'EXPIRES TODAY'};if(n<=3)return {key:'urgent',label:'URGENT · '+n+'D'};if(n<=7)return {key:'soon',label:'DUE SOON · '+n+'D'};return {key:'ok',label:'OK'}};
+ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){alert('Could not save in this browser. Please export a CSV backup.')}};
+ const saveAlerts=()=>{try{localStorage.setItem(ALERT_KEY,JSON.stringify(alertSettings))}catch(e){}}
+ const todayKey=()=>{const d=today();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+ const alertItems=()=>items.filter(i=>{const n=dayDiff(i.expiry);return n!==null&&n<=7});
+ const alertText=()=>{const due=alertItems();if(!due.length)return 'Cafe expiry check: no items are due within the next 7 days.';const lines=due.sort((a,b)=>dayDiff(a.expiry)-dayDiff(b.expiry)).slice(0,12).map(i=>{const n=dayDiff(i.expiry);return (n<0?'EXPIRED '+Math.abs(n)+'d ago':n===0?'EXPIRES TODAY':n+' day(s) left')+': '+i.name});return 'Cafe expiry check — '+due.length+' item(s) need attention:\n'+lines.join('\n')+(due.length>12?'\n…and '+(due.length-12)+' more item(s).':'')};
+ const updateAlertUI=()=>{$('alertsEnabled').checked=!!alertSettings.enabled;$('alertTime').value=alertSettings.time||'08:00';if(nativeAndroid)$('alertMessage').textContent=alertSettings.enabled?'Android daily reminders are enabled for '+(alertSettings.time||'08:00')+'. They can arrive while the app is closed.':'Enable daily alerts and allow notifications when Android asks.';else if(!('Notification' in window))$('alertMessage').textContent='This browser does not support web notifications. Keep the app open and check the dashboard.';else if(Notification.permission==='denied')$('alertMessage').textContent='Notifications are blocked by your browser. Change this site’s notification permission in browser settings.';else if(alertSettings.enabled)$('alertMessage').textContent='Daily reminders are enabled for '+(alertSettings.time||'08:00')+'. The app must be open, and browser permission must be allowed.';else $('alertMessage').textContent='Notifications are off. Enable them and allow permission in your browser.'};
+ const nativeAndroid=!!window.AndroidNotifications;
+ const syncNativeReminder=()=>{if(!nativeAndroid)return;if(alertSettings.enabled)window.AndroidNotifications.scheduleDailyReminder(alertSettings.time||'08:00',alertText());else window.AndroidNotifications.cancelDailyReminder()};
+ const sendAlert=async(test=false)=>{const title=test?'Cafe expiry reminder test':'Cafe stock expiry reminder',body=alertText();if(nativeAndroid){window.AndroidNotifications.showNotification(title,body);if(!test){alertSettings.lastSent=todayKey();saveAlerts()}updateAlertUI();return}if(!('Notification' in window)){alert('This browser does not support notifications.');return}if(Notification.permission==='default'){try{await Notification.requestPermission()}catch(e){}}if(Notification.permission!=='granted'){updateAlertUI();alert('Please allow notifications for this app in your browser settings.');return}new Notification(title,{body,tag:'cafe-expiry-'+todayKey()});if(!test){alertSettings.lastSent=todayKey();saveAlerts()}updateAlertUI()};
+ const checkScheduledAlert=()=>{if(nativeAndroid){syncNativeReminder();return}if(!alertSettings.enabled||alertSettings.lastSent===todayKey())return;const now=new Date(),parts=(alertSettings.time||'08:00').split(':').map(Number);if(now.getHours()>parts[0]||(now.getHours()===parts[0]&&now.getMinutes()>=parts[1]))sendAlert(false)};
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const fmtDate=s=>s?new Date(s+'T00:00:00').toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'Not entered';
+ function render(){
+  $('totalCount').textContent=items.length;
+  $('expiredCount').textContent=items.filter(i=>statusOf(i).key==='expired').length;
+  $('urgentCount').textContent=items.filter(i=>['today','urgent'].includes(statusOf(i).key)).length;
+  $('soonCount').textContent=items.filter(i=>['today','urgent','soon'].includes(statusOf(i).key)).length;
+  const q=$('search').value.trim().toLowerCase(),sf=$('statusFilter').value,cf=$('categoryFilter').value;
+  const filtered=items.map((item,index)=>({...item,index})).filter(i=>(!q||[i.name,i.supplier,i.batch,i.category,i.storage].some(x=>String(x||'').toLowerCase().includes(q)))&&(sf==='all'||statusOf(i).key===sf)&&(cf==='all'||i.category===cf)).sort((a,b)=>{const da=dayDiff(a.expiry),db=dayDiff(b.expiry);return (da===null?99999:da)-(db===null?99999:db)});
+  $('visibleCount').textContent=filtered.length+' item'+(filtered.length===1?'':'s');
+  $('stockRows').innerHTML=filtered.map(i=>{const s=statusOf(i),n=dayDiff(i.expiry);return `<tr>
+   <td><div class="product">${esc(i.name)}</div><div class="sub">${i.batch?'Batch '+esc(i.batch):esc(i.supplier||'No supplier added')}</div></td>
+   <td>${esc(i.category)}</td><td>${esc(fmtDate(i.expiry))}</td>
+   <td>${i.qty!==''&&i.qty!=null?esc(i.qty)+' '+esc(i.unit||''):'—'}</td><td>${esc(i.storage||'—')}</td>
+   <td>${n===null?'—':n<0?Math.abs(n)+' days ago':n===0?'Today':n+' days'}</td>
+   <td><span class="pill ${s.key==='today'?'urgent':s.key}">${s.label}</span></td>
+   <td><div class="rowactions"><button class="iconbtn" data-edit="${i.index}" aria-label="Edit ${esc(i.name)}">✎</button><button class="iconbtn" data-delete="${i.index}" aria-label="Delete ${esc(i.name)}">×</button></div></td></tr>`}).join('');
+  $('emptyState').style.display=filtered.length?'none':'block';
+ }
+ function openModal(item,index){editing=index??null;$('stockForm').reset();$('modalTitle').textContent=editing===null?'Add stock item':'Edit stock item';if(item){Object.entries(item).forEach(([k,v])=>{const f=$('stockForm').elements[k];if(f)f.value=v??''})}$('modalback').classList.add('open');$('stockForm').elements.name.focus()}
+ function closeModal(){$('modalback').classList.remove('open');editing=null}
+ $('addBtn').addEventListener('click',()=>openModal());
+ $('closeModal').addEventListener('click',closeModal);$('cancelBtn').addEventListener('click',closeModal);
+ $('modalback').addEventListener('click',e=>{if(e.target===$('modalback'))closeModal()});
+ $('stockForm').addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(e.target),item={};['name','category','expiry','qty','unit','storage','supplier','batch','notes'].forEach(k=>item[k]=fd.get(k));if(editing===null)items.push(item);else items[editing]=item;save();render();closeModal()});
+ $('stockRows').addEventListener('click',e=>{const ed=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');if(ed)openModal(items[+ed.dataset.edit],+ed.dataset.edit);if(del){const i=+del.dataset.delete;if(confirm('Delete '+items[i].name+' from the tracker?')){items.splice(i,1);save();render()}}});
+ ['search','statusFilter','categoryFilter'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));
+ $('exportBtn').addEventListener('click',()=>{const cols=['name','category','expiry','qty','unit','storage','supplier','batch','notes'];const csv=[cols.join(','),...items.map(i=>cols.map(k=>'"'+String(i[k]??'').replace(/"/g,'""')+'"').join(','))].join('\r\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='cafe-expiry-stock.csv';a.click();URL.revokeObjectURL(url)});
+ $('alertsEnabled').addEventListener('change',async e=>{if(e.target.checked){if(nativeAndroid){window.AndroidNotifications.requestPermission();alertSettings.enabled=true;alertSettings.lastSent='';saveAlerts();updateAlertUI();syncNativeReminder();sendAlert(true);return}if(!('Notification' in window)){alertSettings.enabled=false;updateAlertUI();return}if(Notification.permission!=='granted'){try{await Notification.requestPermission()}catch(err){}}if(Notification.permission!=='granted'){alertSettings.enabled=false;saveAlerts();updateAlertUI();return}alertSettings.enabled=true;alertSettings.lastSent='';saveAlerts();updateAlertUI();sendAlert(true)}else{alertSettings.enabled=false;saveAlerts();updateAlertUI();syncNativeReminder()}});
+ $('alertTime').addEventListener('change',()=>{alertSettings.time=$('alertTime').value||'08:00';alertSettings.lastSent='';saveAlerts();updateAlertUI();syncNativeReminder()});
+ $('testAlertBtn').addEventListener('click',()=>sendAlert(true));
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkScheduledAlert()});
+ updateAlertUI();checkScheduledAlert();setInterval(checkScheduledAlert,30000);
+ render();
+})();
+</script>
+</body>
+</html>
