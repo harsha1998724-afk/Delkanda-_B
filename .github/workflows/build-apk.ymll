@@ -1,4 +1,4 @@
-name: Build Freshness Desk APK
+name: Build Freshness Desk APK v2
 on:
 workflow_dispatch:
 push:
